@@ -2,6 +2,9 @@ plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
 
+    id("maven-publish")
+    id("signing")
+
     // Apply the Kotlin JVM plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.4.31"
 }
@@ -28,7 +31,8 @@ dependencies {
 gradlePlugin {
     // Define the plugin
     val compile by plugins.creating {
-        id = "org.twostack.gradle.scrypt"
+        id = "org.twostack.scrypt"
+        version = "1.0.0-SNAPSHOT"
         implementationClass = "org.twostack.gradle.ScryptGradlePlugin"
     }
 }
@@ -50,3 +54,20 @@ tasks.check {
     // Run the functional tests as part of `check`
     dependsOn(functionalTest)
 }
+
+java {
+    sourceCompatibility = JavaVersion.toVersion("1.8")
+}
+
+
+//publishing {
+//    publications {
+//       create<MavenPublication>("maven") {
+//           groupId = "org.twostack.gradle"
+//           artifactId = "scrypt-gradle-plugin"
+//           version = "1.0.0-SNAPSHOT"
+//
+//           from(components["java"])
+//       }
+//    }
+//}

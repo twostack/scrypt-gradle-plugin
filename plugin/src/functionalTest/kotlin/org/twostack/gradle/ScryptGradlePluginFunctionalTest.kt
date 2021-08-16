@@ -13,20 +13,48 @@ import kotlin.test.assertTrue
  * A simple functional test for the 'org.twostack.gradle.scrypt.greeting' plugin.
  */
 class ScryptGradlePluginFunctionalTest {
+
+   fun setupBasicScrypt(projectDir: File){
+
+       val contractFolder = File(projectDir.absolutePath + "/src/main/scrypt")
+
+       contractFolder.resolve("basic.scrypt").writeText("""
+           contract BasicDemo {
+                public function demo(){ 
+                    require (1 == 1);
+                }
+           }
+       """.trimIndent())
+   }
+
+
     @Test
-    fun `can run task`() {
+    fun `can compile all scrypts found in resources folder`() {
         // Setup the test build
         val projectDir = File("build/functionalTest")
         val userHome = System.getProperty("user.home")
         projectDir.resolve("settings.gradle").writeText("")
         projectDir.resolve("build.gradle").writeText("""
             plugins {
-                id('org.twostack.gradle.scrypt')
-                
+                id 'org.jetbrains.kotlin.jvm' version '1.5.20'
+                id 'org.twostack.gradle.scrypt' version '1.0.0-SNAPSHOT'
+            }
+
+            group 'org.twostack'
+            version '1.0-SNAPSHOT'
+
+            repositories {
+                mavenCentral()
+            }
+
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib"
             }
             
             scrypt {
-                compilerHome = "${userHome}/.vscode/extensions/bsv-scrypt.scrypt-1.1.0/"
+                compilerHome = file("${userHome}/.vscode/extensions/bsv-scrypt.scrypt-1.1.0/")
+                contractFolder = file(projectDir.path + "/src/main/scrypt/")
+                destinationFolder = file("build/alt_resources")
             }
         """)
 
@@ -34,12 +62,14 @@ class ScryptGradlePluginFunctionalTest {
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("compile")
+        runner.withArguments("compileScrypt")
         runner.withProjectDir(projectDir)
+        File(runner.projectDir.absolutePath + "/src/main/scrypt").mkdirs()
+        setupBasicScrypt(projectDir)
         val result = runner.build();
 
-        // Verify the result
-        assertTrue(result.output.contains("Version"))
-    }
+        val outputFile = File("build/functionalTest/build/alt_resources/basic_asm.json")
 
+        assertTrue(outputFile.exists())
+    }
 }

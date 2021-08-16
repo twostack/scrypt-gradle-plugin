@@ -7,5 +7,11 @@
  * in the user manual at https://docs.gradle.org/7.1.1/userguide/multi_project_builds.html
  */
 
-rootProject.name = "scrypt-gradle-plugin"
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+rootProject.name = "org.twostack.scrypt"
 include("plugin")

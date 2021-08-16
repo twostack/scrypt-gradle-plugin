@@ -5,24 +5,29 @@ package org.twostack.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.Plugin
-import org.gradle.api.tasks.Exec
-import java.util.*
 
 /**
  * A simple 'hello world' plugin.
  */
-class ScryptGradlePlugin: Plugin<Project> {
-    override fun apply(project: Project) {
-        val extension = project.extensions.create( "scrypt", ScryptPluginExtension::class.java )
-        // Register a task
-        project.tasks.register("compile") { task ->
-            task.doLast {
+abstract class ScryptGradlePlugin : Plugin<Project> {
 
-                project.exec {
-                    it.commandLine (extension.getCompilerPath().absolutePath)
-                    it.args(listOf("version"))
-                }
-            }
+    override fun apply(project: Project) {
+        val extension = project.extensions.create("scrypt", ScryptPluginExtension::class.java)
+
+        project.tasks.register("compileScrypt", ScryptTask::class.java) { task ->
+
+            if (extension.contractFolder.isPresent)
+                task.contractFolder.set(extension.contractFolder)
+            else
+                task.contractFolder.set(project.layout.projectDirectory.dir("src/main/scrypt"))
+
+            if (extension.destinationFolder.isPresent)
+                task.destinationFolder.set(extension.destinationFolder)
+            else
+                task.destinationFolder.set(project.layout.buildDirectory.dir("resources"))
+
+            task.compilerHome.set(extension.compilerHome)
         }
+
     }
 }

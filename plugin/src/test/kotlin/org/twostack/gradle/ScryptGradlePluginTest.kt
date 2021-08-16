@@ -16,7 +16,6 @@ class ScryptGradlePluginTest {
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("org.twostack.gradle.scrypt")
 
-
         // Verify the result
         assertNotNull(project.tasks.findByName("compile"))
     }
